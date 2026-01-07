@@ -43,3 +43,18 @@
   border: none;
   cursor: pointer;
 }
+
+.home-btn {
+  background: #2c335f;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 12px;
+  color: white;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.home-btn:hover {
+  background: #3a4180;
+  transform: translateY(-2px);
+}

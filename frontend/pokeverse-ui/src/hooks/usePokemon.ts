@@ -6,13 +6,18 @@ import {
   getPokemonList,
 } from "../services/api";
 
+const PAGE_SIZE = 24;
+
 export const usePokemon = () => {
   const [pokemon, setPokemon] = useState<any>(null);
-  const [recent, setRecent] = useState<any[]>([]);
   const [list, setList] = useState<any[]>([]);
+  const [recent, setRecent] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [source, setSource] = useState<string | null>(null);
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [sort, setSort] = useState<string>("id_asc");
 
   const searchByName = async (name: string) => {
     try {
@@ -57,29 +62,48 @@ export const usePokemon = () => {
     }
   };
 
-  const loadList = async (sort?: string) => {
+  const loadGrid = async (reset = false, newSort?: string) => {
     try {
+      setLoading(true);
+
+      const appliedSort = newSort ?? sort;
+      const currentOffset = reset ? 0 : offset;
+
       const res = await getPokemonList({
-        limit: 20,
-        offset: 0,
-        sort,
+        limit: PAGE_SIZE,
+        offset: currentOffset,
+        sort: appliedSort,
       });
-      setList(res.data);
+
+      if (reset) {
+        setList(res.data);
+        setOffset(PAGE_SIZE);
+      } else {
+        setList((prev) => [...prev, ...res.data]);
+        setOffset(currentOffset + PAGE_SIZE);
+      }
+
+      setSort(appliedSort);
+      setHasMore(res.data.length === PAGE_SIZE);
     } catch {
-      setList([]);
+      setError("Failed to load Pokémon list");
+    } finally {
+      setLoading(false);
     }
   };
 
   return {
     pokemon,
-    recent,
     list,
+    recent,
     loading,
     error,
     source,
+    hasMore,
+    sort,
     searchByName,
     surpriseMe,
     loadRecent,
-    loadList,
+    loadGrid,
   };
 };

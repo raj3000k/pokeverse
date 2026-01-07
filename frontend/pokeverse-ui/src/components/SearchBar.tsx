@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./search-bar.css";
 
-const SearchBar = ({ onSearch, onSurprise, onSort }: any) => {
+const SearchBar = ({ onSearch, onSurprise, onSort, onHome }: any) => {
   const [value, setValue] = useState("");
   let debounceTimer: any;
 
@@ -25,6 +25,10 @@ const SearchBar = ({ onSearch, onSurprise, onSort }: any) => {
         value={value}
         onChange={handleChange}
       />
+
+      <button className="home-btn" onClick={onHome}>
+        🏠 Home
+      </button>
 
       <button className="surprise-btn" onClick={onSurprise}>
         🎲 Surprise Me
