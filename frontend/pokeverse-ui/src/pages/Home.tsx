@@ -1,35 +1,58 @@
+import { useEffect, useState } from "react";
 import { usePokemon } from "../hooks/usePokemon";
+import Loader from "../components/Loader";
+import PokemonCard from "../components/PokemonCard";
+import RecentSearches from "../components/RecentSearches";
+import SearchBar from "../components/SearchBar";
+import PokemonModal from "../components/PokemonModal";
 
 const Home = () => {
-  const { pokemon, loading, error, source, searchByName, surpriseMe } =
-    usePokemon();
+  const {
+    pokemon,
+    recent,
+    loading,
+    error,
+    source,
+    searchByName,
+    surpriseMe,
+    loadRecent,
+  } = usePokemon();
+
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    loadRecent();
+  }, []);
 
   return (
-    <div style={{ padding: "20px" }}>
-      <input
-        placeholder="Search Pokémon..."
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            searchByName((e.target as HTMLInputElement).value);
-          }
-        }}
+    <div style={{ padding: "30px", maxWidth: "900px", margin: "auto" }}>
+      <SearchBar
+        onSearch={searchByName}
+        onSurprise={surpriseMe}
+        onSort={() => {}}
       />
 
-      <button onClick={surpriseMe} style={{ marginLeft: "10px" }}>
-        🎲 Surprise Me
-      </button>
+      <RecentSearches
+        items={recent}
+        onSelect={(name: string) => searchByName(name)}
+      />
 
-      {loading && <p>Loading...</p>}
+      {loading && <Loader />}
+
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      {pokemon && (
-        <div style={{ marginTop: "20px" }}>
-          <h2>
-            {pokemon.name} {source === "cache" && "⚡"}
-          </h2>
-          <img src={pokemon.image} width={200} />
-          <p>Types: {pokemon.types.join(", ")}</p>
+      {pokemon && !loading && (
+        <div style={{ marginTop: "40px" }}>
+          <PokemonCard
+            pokemon={pokemon}
+            source={source}
+            onClick={() => setOpen(true)}
+          />
         </div>
+      )}
+
+      {open && (
+        <PokemonModal pokemon={pokemon} onClose={() => setOpen(false)} />
       )}
     </div>
   );

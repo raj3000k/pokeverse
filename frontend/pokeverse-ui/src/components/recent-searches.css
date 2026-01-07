@@ -1,0 +1,50 @@
+.recent-container {
+  margin-top: 30px;
+}
+
+.recent-container h3 {
+  margin-bottom: 10px;
+  opacity: 0.9;
+}
+
+.recent-list {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.recent-list::-webkit-scrollbar {
+  height: 6px;
+}
+
+.recent-list::-webkit-scrollbar-thumb {
+  background: #5b2eff;
+  border-radius: 10px;
+}
+
+.recent-card {
+  min-width: 120px;
+  background: #1a1f3c;
+  border-radius: 12px;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.recent-card:hover {
+  transform: translateY(-6px) scale(1.05);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.6);
+}
+
+.recent-card img {
+  width: 60px;
+}
+
+.recent-card span {
+  display: block;
+  margin-top: 6px;
+  text-transform: capitalize;
+  font-size: 14px;
+}
