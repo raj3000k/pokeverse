@@ -34,14 +34,16 @@ const formatPokemon = (data) => {
 };
 
 const fetchPokemonByName = async (name) => {
-  const cached = getFromCache(name);
-  if (!isNaN(Number(name))) {
+  if (!name || typeof name !== "string" || !isNaN(Number(name))) {
     throw {
       status: 400,
       error: "INVALID_INPUT",
-      message: "Pokemon name must be a string, not an ID",
+      message: "Pokemon name must be a valid string",
     };
   }
+
+  const key = name.toLowerCase();
+  const cached = getFromCache(key);
 
   if (cached) {
     return {
@@ -51,10 +53,10 @@ const fetchPokemonByName = async (name) => {
   }
 
   try {
-    const response = await axios.get(`${POKE_API_BASE}/${name}`);
+    const response = await axios.get(`${POKE_API_BASE}/${key}`);
     const formatted = formatPokemon(response.data);
 
-    setInCache(name, formatted);
+    setInCache(formatted.name, formatted);
     updateRecentSearches(formatted);
 
     return {
@@ -79,32 +81,26 @@ const fetchPokemonByName = async (name) => {
 };
 
 const fetchRandomPokemon = async () => {
-  let attempts = 0;
+  const randomId = Math.floor(Math.random() * 898) + 1;
 
-  while (attempts < 5) {
-    try {
-      const randomId = Math.floor(Math.random() * 898) + 1;
+  try {
+    const response = await axios.get(`${POKE_API_BASE}/${randomId}`);
+    const formatted = formatPokemon(response.data);
 
-      const response = await axios.get(`${POKE_API_BASE}/${randomId}`);
-      const formatted = formatPokemon(response.data);
+    setInCache(formatted.name, formatted);
+    updateRecentSearches(formatted);
 
-      setInCache(formatted.name, formatted);
-      updateRecentSearches(formatted);
-
-      return {
-        source: "api",
-        data: formatted,
-      };
-    } catch {
-      attempts += 1;
-    }
+    return {
+      source: "api",
+      data: formatted,
+    };
+  } catch {
+    throw {
+      status: 502,
+      error: "UPSTREAM_FAILURE",
+      message: "Failed to fetch random Pokémon",
+    };
   }
-
-  throw {
-    status: 502,
-    error: "UPSTREAM_FAILURE",
-    message: "Failed to fetch random Pokémon after multiple attempts",
-  };
 };
 
 const fetchPokemonList = async ({ limit, offset, sort }) => {
@@ -115,14 +111,13 @@ const fetchPokemonList = async ({ limit, offset, sort }) => {
 
     let list = response.data.results.map((p, index) => ({
       name: p.name,
-      url: p.url,
       id: offset + index + 1,
     }));
 
-    if (sort === "name_desc") {
-      list.sort((a, b) => b.name.localeCompare(a.name));
-    } else if (sort === "name_asc") {
+    if (sort === "name_asc") {
       list.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sort === "name_desc") {
+      list.sort((a, b) => b.name.localeCompare(a.name));
     } else if (sort === "id_desc") {
       list.sort((a, b) => b.id - a.id);
     } else {
